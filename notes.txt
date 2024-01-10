@@ -1,0 +1,6 @@
+git remote add origin https://github.com/RustemV/webapp_phonebook.git
+git branch -M main
+git push -u origin main
+
+По видео "Рабочее веб-приложение на MySQL/MariaDB, Node.js, Express, HTML/CSS"
+https://www.youtube.com/watch?v=t5LmFH5MmbY&list=PLl-8SK3JBHGk-Nul7Sa70oX_WmgUptJCO
