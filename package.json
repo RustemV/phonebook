@@ -1,0 +1,32 @@
+{
+  "name": "webapp_phonebook",
+  "version": "1.0.0",
+  "description": "",
+  "main": "main.js",
+  "scripts": {
+    "start": "node main.js",
+    "dev": "nodemon main.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/RustemV/phonebook.git"
+  },
+  "keywords": [
+    "Node",
+    "JS",
+    "MySQL"
+  ],
+  "author": "RustemV",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/RustemV/phonebook/issues"
+  },
+  "homepage": "https://github.com/RustemV/phonebook#readme",
+  "dependencies": {
+    "express": "^4.18.2",
+    "mysql2": "^3.7.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.2"
+  }
+}

@@ -1,7 +1,7 @@
 const express = require('express');
-
 // get the client
 const mysql = require('mysql2/promise');
+//const bodyParser = require('body-parser');
 
 // create the pool of the connections to the database
 const pool = mysql.createPool(
@@ -14,6 +14,9 @@ const pool = mysql.createPool(
 
 const app = express();
 const port = 3000;
+
+//app.use(bodyParser.urlencoded());
+app.use(express.urlencoded({ extended: false }));
 
 app.get('/', async function(req, res) {
 	const data = await pool.query('SELECT * FROM abonent');
@@ -29,6 +32,44 @@ app.get('/', async function(req, res) {
 				</ul>
 			</body>
 		</html>`);
+});
+
+app.get('/abonent-phones/:abonent_id', async function(req, res) {
+	const { abonent_id:abonentId } = req.params; // {} деструктуризация объекта, получаем abonentId - значение поля abonent_id
+	const [phones] = await pool.query(`SELECT * FROM phone WHERE abonent_id = ?`, abonentId); // [] деструктуризация массива, phones - массив обьектов-кортежей
+	const [[abonent]] = await pool.query(`SELECT * FROM abonent WHERE id = ?`, abonentId); // [] деструктуризация массива объектов, 
+	res.send(`<!DOCTYPE html>
+		<html>
+			<body>
+				<h1>Телефонные номера абонента ${abonent.name}</h1>
+				<a href="/">Cписок абонентов</a> 
+				<hr>
+				<ul>
+					${phones.map(item => `<li>${item.number} ${item.type} <a href="/phone-delete/${item.id}">удалить</a> </li>`).join('')}
+				</ul>
+				<form method="post" action="/phone-add/${abonentId}">
+					<input type="text" name="number" placeholder="Номер">
+					<input type="text" name="type" placeholder="Тип">
+					<input type="submit" value="Добавить">
+				</form>
+			</body>
+		</html>`);
+});
+
+app.post('/phone-add/:abonent_id', async function(req, res) {
+	const { abonent_id:abonentId } = req.params; // {} деструктуризация объекта, получаем abonentId - значение поля abonent_id
+	const {number, type} = req.body;
+	console.log('adding number:  ', number);
+	await pool.query('INSERT into PHONE SET ?', {abonent_id: abonentId, number: number, type: type});
+	res.redirect(`/abonent-phones/${abonentId}`);
+});
+
+app.get('/phone-delete/:phone_id', async function(req, res) {
+	const phoneId = req.params.phone_id; 
+	const [[phone]] = await pool.query(`SELECT * FROM phone WHERE id=?`, phoneId); //нужно только, чтобы сохранить abonent_id
+	console.log('deleting...', phone);
+	await pool.query(`DELETE FROM phone WHERE id=?`, phoneId);
+	res.redirect(`/abonent-phones/${phone.abonent_id}`);
 });
 
 app.get('/search', async function(req, res) {
@@ -55,26 +96,6 @@ app.get('/search', async function(req, res) {
 				</ul>
 			</body>
 		</html>`); 
-});
-
-app.get('/abonent-phones/:abonent_id', async function(req, res) {
-	const { abonent_id:abonentId } = req.params; // {} деструктуризация
-	const phonesData = await pool.query(`SELECT * FROM phone WHERE abonent_id = ?`, abonentId);
-	const [phones] = phonesData; // [] деструктуризация, phones - массив обьектов-картелей
-	const abonentData = await pool.query(`SELECT * FROM abonent WHERE id = ?`, abonentId);
-	const [[abonent]] = abonentData; // [] деструктуризация, [abonent] - массив из одного объекта-картеля, 
-									// abonent - один обьект-картель
-	res.send(`<!DOCTYPE html>
-		<html>
-			<body>
-				<h1>Телефонные номера абонента ${abonent.name}</h1>
-				<a href="/">Cписок абонентов</a>
-				<hr>
-				<ul>
-					${phones.map(item => `<li>${item.number} ${item.type}</li>`).join('')}
-				</ul>
-			</body>
-		</html>`);
 });
 
 app.get('/a', function(req, res) {
